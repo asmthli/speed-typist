@@ -1,5 +1,7 @@
 import tkinter as tk
-from tkinter import font
+
+from highscores_ui import Highscores
+from game_ui import Game
 
 
 def start_game():
@@ -38,19 +40,19 @@ class Menu(tk.Tk):
 
     def create_play_game_btn(self):
         def play_game():
-            print("Play game")
+            Game(self)
 
         return tk.Button(master=self, text="Play", command=play_game)
 
     def create_highscore_btn(self):
         def show_highscores():
-            print("Highscores")
+            Highscores(self)
 
         return tk.Button(master=self, text="Highscores", command=show_highscores)
 
     def create_quit_btn(self):
         def quit_game():
-            print("Quit game")
+            self.destroy()
 
         return tk.Button(master=self, text="Quit", command=quit_game)
 
