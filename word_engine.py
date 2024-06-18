@@ -8,6 +8,8 @@ class WordEngine:
                                  "sentences": 40}
         self.sentences = self.fetch_words(num_sentences)
 
+        self.current_letter_idx = 0
+
     def fetch_words(self, num_sentences):
         self.words_API_params["sentences"] = num_sentences
         response = requests.get(self.words_API_endpoint,
