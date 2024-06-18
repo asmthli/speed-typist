@@ -14,8 +14,11 @@ class Menu(tk.Tk):
     def __init__(self):
         super().__init__()
 
+        self.bg_colour = "slategrey"
+
         self.set_window_geometry(300, 300)
         self.title("Speed Typist")
+        self.configure(bg=self.bg_colour)
 
         self.create_title()
         self.create_buttons()
@@ -36,7 +39,10 @@ class Menu(tk.Tk):
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
     def create_title(self):
-        title = tk.Label(master=self, text="Speed Typist!", font=("arial", 20, "bold underline"))
+        title = tk.Label(master=self,
+                         text="Speed Typist!",
+                         bg=self.bg_colour,
+                         font=("arial", 20, "bold underline"))
         title.grid(row=0, column=0)
         return title
 

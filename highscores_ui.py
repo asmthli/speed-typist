@@ -9,6 +9,9 @@ class Highscores(tk.Toplevel):
         self.set_close_behaviour(parent_window)
         self.set_window_geometry(300, 300)
 
+        self.bg_colour = parent_window.bg_colour
+        self.configure(bg=self.bg_colour)
+
     def set_close_behaviour(self, parent_window):
         def close_and_restore():
             parent_window.deiconify()
