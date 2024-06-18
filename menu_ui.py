@@ -12,7 +12,8 @@ def start_game():
 class Menu(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry("300x300")
+
+        self.set_window_geometry(300, 300)
         self.title("Speed Typist")
 
         self.create_title()
@@ -23,6 +24,15 @@ class Menu(tk.Tk):
 
     def launch(self):
         self.mainloop()
+
+    def set_window_geometry(self, window_width, window_height):
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+
+        x = screen_width // 2 - window_width // 2
+        y = screen_height // 2 - window_height // 2
+
+        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
     def create_title(self):
         title = tk.Label(master=self, text="Speed Typist!", font=("arial", 20, "bold underline"))
