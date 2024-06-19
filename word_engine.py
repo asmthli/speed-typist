@@ -50,8 +50,8 @@ class WordEngine:
                 boundary_indices.append(idx)
         return boundary_indices[::-1]
 
-    def current_char_textbox_idx(self):
-        return "1." + str(self.current_char_index)
+    def current_char_textbox_idx(self, chars_ahead=0):
+        return "1." + str(self.current_char_index + chars_ahead)
 
     def advance_current_char(self):
         if self.current_char_index == self.next_word_boundary:

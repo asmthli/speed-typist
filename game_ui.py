@@ -40,7 +40,7 @@ class Game(tk.Toplevel):
                           font=("arial", 24, "bold italic"))
         textbox.insert(tk.END, self.word_engine.sentences)
 
-        # Associate colours with tags so we can highlight letters later.
+        # Associate colours with tags, so we can highlight letters later.
         textbox.tag_configure("current_letter", foreground=self.current_letter_colour)
         textbox.tag_configure("completed_letter", foreground=self.completed_letter_colour)
 
@@ -58,9 +58,12 @@ class Game(tk.Toplevel):
             char_pressed = event.char
 
             if char_pressed == self.word_engine.current_char:
+                # Ensure we can always see 20 characters ahead.
+                self.main_textbox.see(self.word_engine.current_char_textbox_idx(chars_ahead=20))
+
                 if self.word_engine.at_end_of_word():
                     self.word_engine.words_completed += 1
-                    self.wpm_counter.set(self.word_engine.words_per_min())
+                    self.wpm_counter.set("WPM: " + str(self.word_engine.words_per_min()))
 
                 self.word_engine.advance_current_char()
 
