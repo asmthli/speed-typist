@@ -12,26 +12,42 @@ class Game(tk.Toplevel):
         self.set_close_behaviour(parent_window)
         self.set_window_geometry(900, 300)
 
+        self.word_engine = WordEngine(num_sentences=80)
+
         self.bg_colour = parent_window.bg_colour
         self.font = ("arial", 14, "bold italic")
         self.configure(bg=self.bg_colour)
 
-        self.word_engine = WordEngine(num_sentences=80)
-
-        self.create_static_widgets()
-        self.current_letter_colour = "green"
-        self.completed_letter_colour = "orange"
-        self.main_textbox = self.create_main_textbox()
-        self.wpm_counter = self.create_wpm_counter()
-
-        self.setup_text_colouring_events()
-
         self.rowconfigure((0, 1, 2, 3), weight=1)
         self.columnconfigure(0, weight=1)
+
+        self.bind("<KeyPress>", func=self.handle_keypress)
+
+        self.create_static_widgets()
+
+        self.wpm_counter = WPMCounter(self)
+        self.wpm_counter.grid(row=2, column=0)
+
+        self.main_textbox = MainTextbox(self, self.word_engine)
+        self.main_textbox.grid(row=1, column=0)
 
         self.time_bar = TimeBar(self)
         self.time_bar.grid(row=3, column=0)
         self.time_bar.start_timer()
+
+    def handle_keypress(self, event):
+        char_pressed = event.char
+
+        if char_pressed == self.word_engine.current_char:
+            if self.word_engine.at_end_of_word():
+                self.word_engine.words_completed += 1
+
+            self.word_engine.advance_current_char()
+
+            self.main_textbox.colour_characters()
+            self.main_textbox.update_view()
+
+            self.wpm_counter.counter_var.set(value=self.word_engine.words_per_min())
 
     def create_static_widgets(self):
         title_lbl = tk.Label(master=self,
@@ -39,62 +55,6 @@ class Game(tk.Toplevel):
                              bg=self.bg_colour,
                              font=("arial", 16, "bold italic"))
         title_lbl.grid(row=0, column=0)
-
-    def create_main_textbox(self):
-        textbox = tk.Text(master=self,
-                          height=2,
-                          wrap="none",
-                          bg=self.bg_colour,
-                          font=("arial", 24, "bold italic"))
-        textbox.insert(tk.END, self.word_engine.sentences)
-
-        # Associate colours with tags, so we can highlight letters later.
-        textbox.tag_configure("current_letter", foreground=self.current_letter_colour)
-        textbox.tag_configure("completed_letter", foreground=self.completed_letter_colour)
-
-        # Set first character as current.
-        textbox.tag_add("current_letter", "1." + str(self.word_engine.current_char_index))
-
-        textbox.configure(state=tk.DISABLED)
-
-        textbox.focus_force()
-
-        textbox.grid(row=1, column=0)
-
-        return textbox
-
-    def setup_text_colouring_events(self):
-        def handle_keypress(event):
-            char_pressed = event.char
-
-            if char_pressed == self.word_engine.current_char:
-                # Ensure we can always see 20 characters ahead.
-                self.main_textbox.see(self.word_engine.current_char_textbox_idx(chars_ahead=20))
-
-                if self.word_engine.at_end_of_word():
-                    self.word_engine.words_completed += 1
-                    self.wpm_counter.set("WPM: " + str(self.word_engine.words_per_min()))
-
-                self.word_engine.advance_current_char()
-
-                # Colour completed characters.
-                # self.main_textbox.tag_remove(tagName="current_letter",
-                #                              index1="current_letter.first")
-
-                # Colour the current character.
-                self.main_textbox.tag_add(tagName="current_letter",
-                                          index1=self.word_engine.current_char_textbox_idx())
-
-        self.main_textbox.bind("<Key>", handle_keypress)
-
-    def create_wpm_counter(self):
-        wpm_counter = tk.StringVar(value="WPM: 0")
-        tk.Label(master=self,
-                 textvariable=wpm_counter,
-                 bg=self.bg_colour,
-                 font=("arial", 14, "bold")).grid(row=2, column=0)
-
-        return wpm_counter
 
     def set_close_behaviour(self, parent_window):
         def close_and_restore():
@@ -111,6 +71,55 @@ class Game(tk.Toplevel):
         y = screen_height // 2 - window_height // 2
 
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
+
+class MainTextbox(tk.Text):
+    def __init__(self, parent, word_engine):
+        super().__init__(master=parent,
+                         height=2,
+                         wrap="none",
+                         bg=parent.bg_colour,
+                         font=("arial", 24, "bold italic"))
+
+        self.current_letter_colour = "green"
+        self.completed_letter_colour = "orange"
+
+        self.word_engine = word_engine
+
+        self.insert(tk.END, self.word_engine.sentences)
+
+        # Associate colours with tags, so we can highlight letters later.
+        self.tag_configure("current_letter", foreground=self.current_letter_colour)
+        self.tag_configure("completed_letter", foreground=self.completed_letter_colour)
+
+        # Set first character as current.
+        self.tag_add("current_letter", "1.0")
+
+        self.configure(state=tk.DISABLED)
+
+        self.focus_force()
+
+    def update_view(self):
+        self.see(self.word_engine.current_char_textbox_idx(chars_ahead=20))
+
+    def colour_characters(self):
+        # Colour completed characters.
+        # self.main_textbox.tag_remove(tagName="current_letter",
+        #                              index1="current_letter.first")
+
+        # Colour the current character.
+        self.tag_add(tagName="current_letter",
+                     index1=self.word_engine.current_char_textbox_idx())
+
+
+class WPMCounter(tk.Label):
+    def __init__(self, parent):
+        self.counter_var = tk.StringVar(value="WPM: 0")
+
+        super().__init__(master=parent,
+                         textvariable=self.counter_var,
+                         bg=parent.bg_colour,
+                         font=("arial", 14, "bold"))
 
 
 class TimeBar(tk.Frame):
