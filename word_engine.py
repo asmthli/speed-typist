@@ -1,4 +1,5 @@
 import requests
+import time
 
 
 class WordEngine:
@@ -15,6 +16,26 @@ class WordEngine:
         self.next_word_boundary = self.word_boundaries.pop()
 
         self.words_completed = 0
+
+        self.words_per_min = self.make_words_per_min_counter()
+
+    def make_words_per_min_counter(self):
+        seconds_elapsed = 0
+        previous_time = time.time()
+
+        def words_per_min():
+            nonlocal seconds_elapsed, previous_time
+            time_now = time.time()
+            seconds_elapsed += time_now - previous_time
+            previous_time = time_now
+
+            if seconds_elapsed == 0:
+                return 0
+            else:
+                minutes_elapsed = seconds_elapsed / 60
+                return round(self.words_completed / minutes_elapsed, 2)
+
+        return words_per_min
 
     def at_end_of_word(self) -> bool:
         if self.current_char_index == self.next_word_boundary:

@@ -60,7 +60,7 @@ class Game(tk.Toplevel):
             if char_pressed == self.word_engine.current_char:
                 if self.word_engine.at_end_of_word():
                     self.word_engine.words_completed += 1
-                    print(self.word_engine.words_completed)
+                    self.wpm_counter.set(self.word_engine.words_per_min())
 
                 self.word_engine.advance_current_char()
 
@@ -71,9 +71,6 @@ class Game(tk.Toplevel):
                 # Colour the current character.
                 self.main_textbox.tag_add(tagName="current_letter",
                                           index1=self.word_engine.current_char_textbox_idx())
-
-
-
 
         self.main_textbox.bind("<Key>", handle_keypress)
 
