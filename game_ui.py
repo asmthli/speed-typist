@@ -23,17 +23,28 @@ class Game(tk.Toplevel):
 
         self.bind("<KeyPress>", func=self.handle_keypress)
 
-        self.create_static_widgets()
-
+        # Create widgets
+        self.title_label = self.create_title()
         self.wpm_counter = WPMCounter(self)
-        self.wpm_counter.grid(row=2, column=0)
-
         self.main_textbox = MainTextbox(self, self.word_engine)
-        self.main_textbox.grid(row=1, column=0)
-
         self.time_bar = TimeBar(self)
-        self.time_bar.grid(row=3, column=0)
+
+        self.set_widget_layouts()
+
         self.time_bar.start_timer()
+
+    def create_title(self):
+        title_label = tk.Label(master=self,
+                               text="Speed Typer!",
+                               bg=self.bg_colour,
+                               font=("arial", 16, "bold italic"))
+        return title_label
+
+    def set_widget_layouts(self):
+        self.title_label.grid(row=0, column=0)
+        self.main_textbox.grid(row=1, column=0)
+        self.wpm_counter.grid(row=2, column=0)
+        self.time_bar.grid(row=3, column=0)
 
     def handle_keypress(self, event):
         char_pressed = event.char
@@ -48,13 +59,6 @@ class Game(tk.Toplevel):
             self.main_textbox.update_view()
 
             self.wpm_counter.counter_var.set(value=self.word_engine.words_per_min())
-
-    def create_static_widgets(self):
-        title_lbl = tk.Label(master=self,
-                             text="Speed Typer!",
-                             bg=self.bg_colour,
-                             font=("arial", 16, "bold italic"))
-        title_lbl.grid(row=0, column=0)
 
     def set_close_behaviour(self, parent_window):
         def close_and_restore():
