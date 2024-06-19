@@ -37,12 +37,6 @@ class WordEngine:
 
         return words_per_min
 
-    def at_end_of_word(self) -> bool:
-        if self.current_char_index == self.next_word_boundary:
-            return True
-        else:
-            return False
-
     def create_word_boundaries(self):
         boundary_indices = []
         for idx, char in enumerate(self.sentences):
@@ -55,6 +49,7 @@ class WordEngine:
 
     def advance_current_char(self):
         if self.current_char_index == self.next_word_boundary:
+            self.words_completed += 1
             self.next_word_boundary = self.word_boundaries.pop()
 
         self.current_char_index += 1

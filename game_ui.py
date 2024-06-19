@@ -7,20 +7,19 @@ from word_engine import WordEngine
 class Game(tk.Toplevel):
     def __init__(self, parent_window):
         super().__init__()
+        # Hide the parent window.
         parent_window.withdraw()
-        self.focus_force()
+
         self.set_close_behaviour(parent_window)
         self.set_window_geometry(900, 300)
-
-        self.word_engine = WordEngine(num_sentences=80)
 
         self.bg_colour = parent_window.bg_colour
         self.font = ("arial", 14, "bold italic")
         self.configure(bg=self.bg_colour)
 
-        self.rowconfigure((0, 1, 2, 3), weight=1)
-        self.columnconfigure(0, weight=1)
+        self.word_engine = WordEngine(num_sentences=80)
 
+        self.focus_force()
         self.bind("<KeyPress>", func=self.handle_keypress)
 
         # Create widgets
@@ -37,10 +36,13 @@ class Game(tk.Toplevel):
         title_label = tk.Label(master=self,
                                text="Speed Typer!",
                                bg=self.bg_colour,
-                               font=("arial", 16, "bold italic"))
+                               font=self.font)
         return title_label
 
     def set_widget_layouts(self):
+        self.rowconfigure((0, 1, 2, 3), weight=1)
+        self.columnconfigure(0, weight=1)
+
         self.title_label.grid(row=0, column=0)
         self.main_textbox.grid(row=1, column=0)
         self.wpm_counter.grid(row=2, column=0)
@@ -50,9 +52,6 @@ class Game(tk.Toplevel):
         char_pressed = event.char
 
         if char_pressed == self.word_engine.current_char:
-            if self.word_engine.at_end_of_word():
-                self.word_engine.words_completed += 1
-
             self.word_engine.advance_current_char()
 
             self.main_textbox.colour_characters()
