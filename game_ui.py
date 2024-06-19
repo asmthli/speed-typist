@@ -1,4 +1,3 @@
-import tkinter
 import tkinter as tk
 
 from word_engine import WordEngine
@@ -25,12 +24,15 @@ class Game(tk.Toplevel):
 
         self.setup_text_colouring_events()
 
+        self.rowconfigure((0, 1, 2), weight=1)
+        self.columnconfigure(0, weight=1)
+
     def create_static_widgets(self):
         title_lbl = tk.Label(master=self,
                              text="Speed Typer!",
                              bg=self.bg_colour,
                              font=("arial", 16, "bold italic"))
-        title_lbl.pack()
+        title_lbl.grid(row=0, column=0)
 
     def create_main_textbox(self):
         textbox = tk.Text(master=self,
@@ -47,10 +49,12 @@ class Game(tk.Toplevel):
         # Set first character as current.
         textbox.tag_add("current_letter", "1." + str(self.word_engine.current_char_index))
 
-        textbox.pack()
         textbox.configure(state=tk.DISABLED)
 
         textbox.focus_force()
+
+        textbox.grid(row=1, column=0)
+
         return textbox
 
     def setup_text_colouring_events(self):
@@ -82,7 +86,8 @@ class Game(tk.Toplevel):
         tk.Label(master=self,
                  textvariable=wpm_counter,
                  bg=self.bg_colour,
-                 font=("arial", 14, "bold")).pack()
+                 font=("arial", 14, "bold")).grid(row=2, column=0)
+
         return wpm_counter
 
     def set_close_behaviour(self, parent_window):
