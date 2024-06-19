@@ -23,7 +23,7 @@ class Game(tk.Toplevel):
         self.bind("<KeyPress>", func=self.handle_keypress)
 
         # Create widgets
-        self.title_label = self.create_title()
+        self.title_label = self.create_title_label()
         self.wpm_counter = WPMCounter(self)
         self.main_textbox = MainTextbox(self, self.word_engine)
         self.time_bar = TimeBar(self)
@@ -32,7 +32,7 @@ class Game(tk.Toplevel):
 
         self.time_bar.start_timer()
 
-    def create_title(self):
+    def create_title_label(self):
         title_label = tk.Label(master=self,
                                text="Speed Typer!",
                                bg=self.bg_colour,
@@ -57,7 +57,8 @@ class Game(tk.Toplevel):
             self.main_textbox.colour_characters()
             self.main_textbox.update_view()
 
-            self.wpm_counter.counter_var.set(value=self.word_engine.words_per_min())
+            current_WPM = self.word_engine.words_per_min()
+            self.wpm_counter.update_value(current_WPM)
 
     def set_close_behaviour(self, parent_window):
         def close_and_restore():
@@ -83,13 +84,11 @@ class MainTextbox(tk.Text):
                          wrap="none",
                          bg=parent.bg_colour,
                          font=("arial", 24, "bold italic"))
+        self.word_engine = word_engine
+        self.insert(tk.END, self.word_engine.sentences)
 
         self.current_letter_colour = "green"
         self.completed_letter_colour = "orange"
-
-        self.word_engine = word_engine
-
-        self.insert(tk.END, self.word_engine.sentences)
 
         # Associate colours with tags, so we can highlight letters later.
         self.tag_configure("current_letter", foreground=self.current_letter_colour)
@@ -98,6 +97,7 @@ class MainTextbox(tk.Text):
         # Set first character as current.
         self.tag_add("current_letter", "1.0")
 
+        # User control is specified by methods below.
         self.configure(state=tk.DISABLED)
 
         self.focus_force()
@@ -117,12 +117,15 @@ class MainTextbox(tk.Text):
 
 class WPMCounter(tk.Label):
     def __init__(self, parent):
-        self.counter_var = tk.StringVar(value="WPM: 0")
+        self.counter_var = tk.StringVar(value="WPM: 00.00")
 
         super().__init__(master=parent,
                          textvariable=self.counter_var,
                          bg=parent.bg_colour,
                          font=("arial", 14, "bold"))
+
+    def update_value(self, value):
+        self.counter_var.set(f"WPM: {value:.2f}")
 
 
 class TimeBar(tk.Frame):
@@ -130,6 +133,8 @@ class TimeBar(tk.Frame):
         super().__init__(parent)
         self.parent = parent
         self.time_progress = tk.IntVar(value=0)
+
+        # Create widgets
         self.progress_bar = self.create_progress_bar()
         self.label = self.create_label()
 
