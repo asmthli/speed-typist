@@ -8,7 +8,15 @@ class WordEngine:
                                  "sentences": 40}
         self.sentences = self.fetch_words(num_sentences)
 
-        self.current_letter_idx = 0
+        self.current_char_index = 0
+        self.current_char = self.sentences[self.current_char_index]
+
+    def current_char_textbox_idx(self):
+        return "1." + str(self.current_char_index)
+
+    def advance_current_char(self):
+        self.current_char_index += 1
+        self.current_char = self.sentences[self.current_char_index]
 
     def fetch_words(self, num_sentences):
         self.words_API_params["sentences"] = num_sentences

@@ -23,8 +23,7 @@ class Game(tk.Toplevel):
         self.main_textbox = self.create_main_textbox()
         self.wpm_counter = self.create_wpm_counter()
 
-        # Testing
-        self.set_character_as_current(1.0)
+        self.setup_text_colouring_events()
 
     def create_static_widgets(self):
         title_lbl = tk.Label(master=self,
@@ -45,12 +44,31 @@ class Game(tk.Toplevel):
         textbox.tag_configure("current_letter", foreground=self.current_letter_colour)
         textbox.tag_configure("completed_letter", foreground=self.completed_letter_colour)
 
+        # Set first character as current.
+        textbox.tag_add("current_letter", "1." + str(self.word_engine.current_char_index))
+
         textbox.pack()
         textbox.configure(state=tk.DISABLED)
+
+        textbox.focus_force()
         return textbox
 
-    def set_character_as_current(self, char_index):
-        self.main_textbox.tag_add("current_letter", char_index)
+    def setup_text_colouring_events(self):
+        def handle_keypress(event):
+            char_pressed = event.char
+
+            if char_pressed == self.word_engine.current_char:
+                self.word_engine.advance_current_char()
+
+                # Colour completed characters.
+                # self.main_textbox.tag_remove(tagName="current_letter",
+                #                              index1="current_letter.first")
+
+                # Colour the current character.
+                self.main_textbox.tag_add(tagName="current_letter",
+                                          index1=self.word_engine.current_char_textbox_idx())
+
+        self.main_textbox.bind("<Key>", handle_keypress)
 
     def create_wpm_counter(self):
         wpm_counter = tk.StringVar(value="WPM: 0")
