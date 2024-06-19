@@ -13,6 +13,7 @@ class Game(tk.Toplevel):
         self.set_window_geometry(900, 300)
 
         self.bg_colour = parent_window.bg_colour
+        self.font = ("arial", 14, "bold italic")
         self.configure(bg=self.bg_colour)
 
         self.word_engine = WordEngine(num_sentences=80)
@@ -23,15 +24,14 @@ class Game(tk.Toplevel):
         self.main_textbox = self.create_main_textbox()
         self.wpm_counter = self.create_wpm_counter()
 
-        self.time_progress = tk.IntVar(value=0)
-        self.create_time_prog_bar()
-
         self.setup_text_colouring_events()
 
-        self.start_timer()
-
-        self.rowconfigure((0, 1, 2), weight=1)
+        self.rowconfigure((0, 1, 2, 3), weight=1)
         self.columnconfigure(0, weight=1)
+
+        self.time_bar = TimeBar(self)
+        self.time_bar.grid(row=3, column=0)
+        self.time_bar.start_timer()
 
     def create_static_widgets(self):
         title_lbl = tk.Label(master=self,
@@ -39,21 +39,6 @@ class Game(tk.Toplevel):
                              bg=self.bg_colour,
                              font=("arial", 16, "bold italic"))
         title_lbl.grid(row=0, column=0)
-
-    def create_time_prog_bar(self):
-        bar = ttk.Progressbar(master=self,
-                              variable=self.time_progress,
-                              maximum=60,
-                              length=300)
-        bar.grid(row=3, column=0)
-
-    def start_timer(self):
-        def add_second():
-            if self.time_progress != 60:
-                self.time_progress.set(self.time_progress.get() + 1)
-                self.after(1000, add_second)
-        self.time_progress.set(0)
-        self.after(1000, add_second)
 
     def create_main_textbox(self):
         textbox = tk.Text(master=self,
@@ -126,3 +111,38 @@ class Game(tk.Toplevel):
         y = screen_height // 2 - window_height // 2
 
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
+
+class TimeBar(tk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.time_progress = tk.IntVar(value=0)
+        self.progress_bar = self.create_progress_bar()
+        self.label = self.create_label()
+
+        self.label.pack(side=tk.LEFT)
+        self.progress_bar.pack(side=tk.LEFT)
+
+    def create_progress_bar(self):
+        progress_bar = ttk.Progressbar(master=self,
+                                       variable=self.time_progress,
+                                       maximum=60,
+                                       length=300,)
+        return progress_bar
+
+    def create_label(self):
+        label = tk.Label(master=self,
+                         text="Time Remaining:",
+                         bg=self.parent.bg_colour,
+                         font=self.parent.font)
+        return label
+
+    def start_timer(self):
+        def add_second():
+            if self.time_progress != 0:
+                self.time_progress.set(self.time_progress.get() - 1)
+                self.after(1000, add_second)
+
+        self.time_progress.set(60)
+        self.after(1000, add_second)
