@@ -62,6 +62,8 @@ class Game(tk.Toplevel):
 
             current_WPM = self.word_engine.words_per_min()
             self.wpm_counter.update_value(current_WPM)
+        else:
+            self.main_textbox.update_view()
 
     def begin_game(self, event):
         self.time_bar.start_timer()
@@ -113,8 +115,10 @@ class MainTextbox(tk.Text):
 
     def colour_characters(self):
         # Colour completed characters.
-        # self.main_textbox.tag_remove(tagName="current_letter",
-        #                              index1="current_letter.first")
+        self.tag_remove(tagName="current_letter",
+                        index1="current_letter.first")
+        self.tag_add("completed_letter",
+                     index1=self.word_engine.current_char_textbox_idx(chars_ahead=-1))
 
         # Colour the current character.
         self.tag_add(tagName="current_letter",
@@ -141,7 +145,7 @@ class CountdownTimer(tk.Frame):
             self.event_generate("<<BeginGame>>")
 
     def switch_widgets(self):
-        self.button.pack_forget()
+        self.button.destroy()
         self.label.pack()
 
     def create_start_btn(self):
@@ -202,10 +206,10 @@ class TimeBar(tk.Frame):
         return label
 
     def start_timer(self):
-        def add_second():
+        def reduce_time():
             if self.time_progress != 0:
                 self.time_progress.set(self.time_progress.get() - 1)
-                self.after(1000, add_second)
+                self.after(1000, reduce_time)
 
         self.time_progress.set(60)
-        self.after(1000, add_second)
+        self.after(1000, reduce_time)
