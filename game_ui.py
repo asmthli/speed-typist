@@ -20,7 +20,6 @@ class Game(tk.Toplevel):
         self.word_engine = WordEngine(num_sentences=80)
 
         self.focus_force()
-        self.bind("<KeyPress>", func=self.handle_keypress)
 
         # Custom event for starting the game.
         self.bind("<<BeginGame>>", func=self.begin_game)
@@ -28,7 +27,7 @@ class Game(tk.Toplevel):
         # Create widgets
         self.title_label = self.create_title_label()
         self.countdown_timer = CountdownTimer(self, countdown_start=3)
-        self.wpm_counter = WPMCounter(self)
+        self.wpm_counter = WPMCounter(self, update_interval=100, word_engine=self.word_engine)
         self.main_textbox = MainTextbox(self, self.word_engine)
         self.time_bar = TimeBar(self)
 
@@ -59,14 +58,14 @@ class Game(tk.Toplevel):
 
             self.main_textbox.colour_characters()
             self.main_textbox.update_view()
-
-            current_WPM = self.word_engine.words_per_min()
-            self.wpm_counter.update_value(current_WPM)
         else:
             self.main_textbox.update_view()
 
     def begin_game(self, event):
         self.time_bar.start_timer()
+        self.wpm_counter.start()
+        # Start handling keyboard input.
+        self.bind("<KeyPress>", func=self.handle_keypress)
 
     def set_close_behaviour(self, parent_window):
         def close_and_restore():
@@ -166,16 +165,26 @@ class CountdownTimer(tk.Frame):
 
 
 class WPMCounter(tk.Label):
-    def __init__(self, parent):
+    def __init__(self, parent, update_interval, word_engine):
         self.counter_var = tk.StringVar(value="WPM: 0.00")
+        self.update_interval = update_interval
+        self.word_engine = word_engine
 
         super().__init__(master=parent,
                          textvariable=self.counter_var,
                          bg=parent.bg_colour,
                          font=("arial", 14, "bold"))
 
-    def update_value(self, value):
-        self.counter_var.set(f"WPM: {value:.2f}")
+    def start(self):
+        def update_and_requeue():
+            self.update_value()
+            self.after(self.update_interval, update_and_requeue)
+
+        self.after(self.update_interval, update_and_requeue)
+
+    def update_value(self):
+        new_value = self.word_engine.words_per_min()
+        self.counter_var.set(f"WPM: {new_value:.2f}")
 
 
 class TimeBar(tk.Frame):
