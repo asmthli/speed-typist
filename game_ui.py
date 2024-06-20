@@ -15,7 +15,9 @@ class Game(tk.Toplevel):
 
         self.bg_colour = parent_window.bg_colour
         self.font = ("arial", 14, "bold italic")
-        self.configure(bg=self.bg_colour)
+        self.configure(bg=self.bg_colour,
+                       padx=5,
+                       pady=20)
 
         self.word_engine = WordEngine(num_sentences=80)
 
@@ -193,6 +195,8 @@ class TimeBar(tk.Frame):
         self.parent = parent
         self.time_progress = tk.IntVar(value=60)
 
+        self.configure(bg=self.parent.bg_colour)
+
         # Create widgets
         self.progress_bar = self.create_progress_bar()
         self.label = self.create_label()
@@ -201,8 +205,16 @@ class TimeBar(tk.Frame):
         self.progress_bar.pack(side=tk.LEFT)
 
     def create_progress_bar(self):
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure("blue.Horizontal.TProgressbar",
+                        foreground='blue',
+                        background='blue',
+                        bordercolor="black")
+
         progress_bar = ttk.Progressbar(master=self,
                                        variable=self.time_progress,
+                                       style="blue.Horizontal.TProgressbar",
                                        maximum=60,
                                        length=300,)
         return progress_bar
