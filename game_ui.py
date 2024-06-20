@@ -22,6 +22,9 @@ class Game(tk.Toplevel):
         self.focus_force()
         self.bind("<KeyPress>", func=self.handle_keypress)
 
+        # Custom event for starting the game.
+        self.bind("<<BeginGame>>", func=self.begin_game)
+
         # Create widgets
         self.title_label = self.create_title_label()
         self.countdown_timer = CountdownTimer(self, countdown_start=3)
@@ -30,8 +33,6 @@ class Game(tk.Toplevel):
         self.time_bar = TimeBar(self)
 
         self.set_widget_layouts()
-
-        self.time_bar.start_timer()
 
     def create_title_label(self):
         title_label = tk.Label(master=self,
@@ -61,6 +62,9 @@ class Game(tk.Toplevel):
 
             current_WPM = self.word_engine.words_per_min()
             self.wpm_counter.update_value(current_WPM)
+
+    def begin_game(self, event):
+        self.time_bar.start_timer()
 
     def set_close_behaviour(self, parent_window):
         def close_and_restore():
@@ -134,6 +138,7 @@ class CountdownTimer(tk.Frame):
             self.after(1000, self.countdown)
         else:
             self.label.configure(textvariable=tk.StringVar(value="Go!"))
+            self.event_generate("<<BeginGame>>")
 
     def switch_widgets(self):
         self.button.pack_forget()
@@ -173,7 +178,7 @@ class TimeBar(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.time_progress = tk.IntVar(value=0)
+        self.time_progress = tk.IntVar(value=60)
 
         # Create widgets
         self.progress_bar = self.create_progress_bar()
