@@ -24,6 +24,7 @@ class Game(tk.Toplevel):
 
         # Create widgets
         self.title_label = self.create_title_label()
+        self.countdown_timer = CountdownTimer(self, countdown_start=3)
         self.wpm_counter = WPMCounter(self)
         self.main_textbox = MainTextbox(self, self.word_engine)
         self.time_bar = TimeBar(self)
@@ -47,6 +48,7 @@ class Game(tk.Toplevel):
         self.main_textbox.grid(row=1, column=0)
         self.wpm_counter.grid(row=2, column=0)
         self.time_bar.grid(row=3, column=0)
+        self.countdown_timer.grid(row=4, column=0)
 
     def handle_keypress(self, event):
         char_pressed = event.char
@@ -115,9 +117,48 @@ class MainTextbox(tk.Text):
                      index1=self.word_engine.current_char_textbox_idx())
 
 
+class CountdownTimer(tk.Frame):
+    def __init__(self, parent, countdown_start):
+        super().__init__(master=parent)
+        self.parent = parent
+
+        self.label_counter = tk.IntVar(value=countdown_start)
+        self.label = self.create_countdown_lbl()
+
+        self.button = self.create_start_btn()
+        self.button.pack()
+
+    def countdown(self):
+        if self.label_counter.get() != 0:
+            self.label_counter.set(self.label_counter.get() - 1)
+            self.after(1000, self.countdown)
+        else:
+            self.label.configure(textvariable=tk.StringVar(value="Go!"))
+
+    def switch_widgets(self):
+        self.button.pack_forget()
+        self.label.pack()
+
+    def create_start_btn(self):
+        def start_countdown():
+            self.after(1000, self.countdown)
+            self.switch_widgets()
+
+        button = ttk.Button(master=self,
+                            text="Start Countdown",
+                            command=start_countdown)
+        return button
+
+    def create_countdown_lbl(self):
+        return tk.Label(master=self,
+                        bg=self.parent.bg_colour,
+                        font=self.parent.font,
+                        textvariable=self.label_counter)
+
+
 class WPMCounter(tk.Label):
     def __init__(self, parent):
-        self.counter_var = tk.StringVar(value="WPM: 00.00")
+        self.counter_var = tk.StringVar(value="WPM: 0.00")
 
         super().__init__(master=parent,
                          textvariable=self.counter_var,
